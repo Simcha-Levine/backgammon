@@ -61,28 +61,6 @@ bool Board::checkMoveTo(int column, unsigned int i)
     return true;
 }
 
-bool Board::checkPrisonMoves()
-{
-    for (std::size_t i = 0; i < dice.size(); i++)
-    {
-        if (turn == Side::BLACK)
-        {
-            if (checkMoveTo(-1, i))
-            {
-                return true;
-            }
-        }
-        else
-        {
-            if (checkMoveTo(24, i))
-            {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 void Board::move(int column, unsigned int i)
 {
     if (i >= dice.size())
@@ -92,41 +70,6 @@ void Board::move(int column, unsigned int i)
     if (column >= 0 && column < 24 && column + dice[i] >= 0 && column + dice[i] < 24)
     {
         Column &org = list[(unsigned int)column];
-        Column &des = list[(unsigned int)(column + dice[i])];
-        if (des.checkForEat(turn))
-        {
-            des.eat(turn);
-            org.remove();
-            if (turn == Side::BLACK)
-            {
-                wPrison.add(Side::WHITE);
-            }
-            else
-            {
-                bPrison.add(Side::BLACK);
-            }
-            dice.erase(dice.begin() + i);
-        }
-        else if (des.checkForLand(turn))
-        {
-            des.add(turn);
-            org.remove();
-            dice.erase(dice.begin() + i);
-        }
-    }
-}
-
-void Board::moveOutOfPrison(unsigned int i)
-{
-    if (i >= dice.size())
-    {
-        return;
-    }
-    int column = (turn == Side::BLACK) ? -1 : 24;
-
-    if (column + dice[i] >= 0 && column + dice[i] < 24)
-    {
-        Column &org = (turn == Side::BLACK) ? bPrison : wPrison;
         Column &des = list[(unsigned int)(column + dice[i])];
         if (des.checkForEat(turn))
         {
@@ -204,7 +147,7 @@ void Board::parsTurn()
     turn = (turn == Side::BLACK) ? Side::WHITE : Side::BLACK;
 }
 
-bool Board::validColumnDes(int column)
+bool Board::validColumnDestination(int column)
 {
     return column >= 0 && column < 24 &&
            (list[(unsigned int)column].getSide() == turn ||
@@ -222,4 +165,61 @@ bool Board::validColumn(int column)
 Column &Board::getPrison()
 {
     return (turn == Side::BLACK) ? bPrison : wPrison;
+}
+
+void Board::moveOutOfPrison(unsigned int i)
+{
+    if (i >= dice.size())
+    {
+        return;
+    }
+    int column = (turn == Side::BLACK) ? -1 : 24;
+
+    if (column + dice[i] >= 0 && column + dice[i] < 24)
+    {
+        Column &org = (turn == Side::BLACK) ? bPrison : wPrison;
+        Column &des = list[(unsigned int)(column + dice[i])];
+        if (des.checkForEat(turn))
+        {
+            des.eat(turn);
+            org.remove();
+            if (turn == Side::BLACK)
+            {
+                wPrison.add(Side::WHITE);
+            }
+            else
+            {
+                bPrison.add(Side::BLACK);
+            }
+            dice.erase(dice.begin() + i);
+        }
+        else if (des.checkForLand(turn))
+        {
+            des.add(turn);
+            org.remove();
+            dice.erase(dice.begin() + i);
+        }
+    }
+}
+
+bool Board::checkPrisonMoves()
+{
+    for (std::size_t i = 0; i < dice.size(); i++)
+    {
+        if (turn == Side::BLACK)
+        {
+            if (checkMoveTo(-1, i))
+            {
+                return true;
+            }
+        }
+        else
+        {
+            if (checkMoveTo(24, i))
+            {
+                return true;
+            }
+        }
+    }
+    return false;
 }

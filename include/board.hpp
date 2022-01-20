@@ -34,7 +34,7 @@ public:
 
     void parsTurn();
 
-    bool validColumnDes(int column);
+    bool validColumnDestination(int column);
     bool validColumn(int column);
 
     Column &getPrison();

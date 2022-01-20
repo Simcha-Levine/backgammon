@@ -10,7 +10,6 @@ int width = 800;
 int hight = 700;
 int chosen = -1;
 Graphics graphics(&board, &width, &hight, &chosen);
-bool pause1 = true;
 
 void drawTerminal(Board &board);
 void test();
@@ -38,43 +37,63 @@ int getColumn(sf::Vector2i p)
     return col;
 }
 
+int getUsedDiceIndex(int col, int chosen)
+{
+    int stepSize = col - chosen;
+
+    for (size_t i = 0; i < board.dice.size(); i++)
+    {
+        if (board.dice[i] == stepSize)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
 void chose(sf::RenderWindow &win)
 {
     sf::Vector2i p = sf::Mouse::getPosition(win);
     int col = getColumn(p);
-    int t = -1;
+    int diceUsedIndex = -1;
 
-    if (chosen == -1)
+    if (chosen == -1 && board.getPrison().getCount() == 0)
     {
         if (board.validColumn(col))
         {
-            if (board.getPrison().getCount() > 0)
-            {
-                // col = board.getPrison();
-            }
             chosen = col;
+        }
+    }
+    else if (board.getPrison().getCount() > 0)
+    {
+        if (board.validColumnDestination(col))
+        {
+            diceUsedIndex = getUsedDiceIndex(col, chosen);
+
+            int t = (board.turn == Side::BLACK) ? -1 : 24;
+
+            if (diceUsedIndex != -1 && board.checkMoveTo(t, diceUsedIndex))
+            {
+                board.moveOutOfPrison(diceUsedIndex);
+                turns();
+            }
+            chosen = -1;
         }
     }
     else
     {
-        if (board.validColumnDes(col))
+        if (board.validColumnDestination(col))
         {
-            int r = col - chosen;
-            for (size_t i = 0; i < board.dice.size(); i++)
+            diceUsedIndex = getUsedDiceIndex(col, chosen);
+
+            if (diceUsedIndex != -1 &&
+                board.checkMoveTo(chosen, diceUsedIndex))
             {
-                if (board.dice[i] == r)
-                {
-                    t = i;
-                    break;
-                }
+                board.move(chosen, diceUsedIndex);
+                turns();
             }
+            chosen = -1;
         }
-        if (t != -1 && board.validColumnDes(col) && board.checkMoveTo(chosen, t))
-        {
-            board.move(chosen, t);
-            turns();
-        }
-        chosen = -1;
     }
 }
 
@@ -96,7 +115,6 @@ int main()
                 if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                 {
                     chose(window);
-                    pause1 = true;
                 }
             }
         }
