@@ -1,4 +1,4 @@
-#include "board.hpp"
+#include "../include/board.hpp"
 #include <iostream>
 
 Board::Board(Side start)

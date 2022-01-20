@@ -1,4 +1,4 @@
-#include "graphics.hpp"
+#include "../include/graphics.hpp"
 #include <string>
 #include <sstream>
 #include <math.h>

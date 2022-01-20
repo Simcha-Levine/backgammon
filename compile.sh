@@ -1,6 +1,9 @@
-if g++ -o result/backgammon.linux main.cpp column.cpp board.cpp graphics.cpp \
-    -lsfml-graphics -lsfml-window -lsfml-system \
-    -pedantic-errors -Wall -Wextra; then
+if
+    g++ -o result/backgammon.linux \
+        src/main.cpp src/column.cpp src/board.cpp src/graphics.cpp \
+        -lsfml-graphics -lsfml-window -lsfml-system \
+        -pedantic-errors -Wall -Wextra
+then
     echo "compiled successfully"
     ./result/backgammon.linux
 fi

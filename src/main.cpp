@@ -2,7 +2,7 @@
 #include <vector>
 #include <array>
 #include <SFML/Graphics.hpp>
-#include "graphics.hpp"
+#include "../include/graphics.hpp"
 #include <unistd.h>
 
 Board board(Side::BLACK);
