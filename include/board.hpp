@@ -9,8 +9,11 @@ private:
     Column white_end{6, Side::WHITE};
 
     bool checkMovesFor(unsigned int column);
-    bool checkMoveTo(unsigned int column, unsigned int diceIndex);
+    bool checkMoveTo(int column, unsigned int diceIndex);
     unsigned int move(unsigned int column, unsigned int diceIndex);
+
+    bool checkPrisonMoves();
+    unsigned int moveOutOfPrison(unsigned int diceIndex);
 
 public:
     std::array<Column, 24> list{};
@@ -29,11 +32,11 @@ public:
 
     bool signColumnsFor(unsigned int column);
     bool moveTo(unsigned int originColumn, unsigned int column);
+
+    bool signColumnsForPrison();
+    bool moveFromPrisonTo(unsigned int column);
+
     void reset();
-
-    bool checkPrisonMoves();
-
-    void moveOutOfPrison(unsigned int diceIndex);
 
     void parsTurn();
 

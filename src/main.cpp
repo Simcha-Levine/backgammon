@@ -21,6 +21,11 @@ void turns()
         board.parsTurn();
         board.generateDice();
     }
+
+    if (board.getPrison().getCount() > 0)
+    {
+        board.signColumnsForPrison();
+    }
 }
 
 int getColumn(sf::Vector2i p)
@@ -68,31 +73,14 @@ void chose(sf::RenderWindow &win)
     }
     else if (board.getPrison().getCount() > 0)
     {
-        // if (board.validColumnDestination(col))
-        // {
-        //     diceUsedIndex = getUsedDiceIndex(col, chosen);
-
-        //     int t = (board.turn == Side::BLACK) ? -1 : 24;
-
-        //     if (diceUsedIndex != -1 && board.checkMoveTo(t, diceUsedIndex))
-        //     {
-        //         board.moveOutOfPrison(diceUsedIndex);
-        //         turns();
-        //     }
-        //     chosen = -1;
-        // }
+        board.moveFromPrisonTo(col);
+        turns();
     }
     else
     {
-        if (board.validColumnDestination(col))
-        {
-
-            if (board.moveTo(chosen, col))
-            {
-                turns();
-            }
-            chosen = -1;
-        }
+        board.moveTo(chosen, col);
+        turns();
+        chosen = -1;
     }
 }
 

@@ -48,7 +48,7 @@ void Board::generateDice()
     }
 }
 
-bool Board::checkMoveTo(unsigned int column, unsigned int i)
+bool Board::checkMoveTo(int column, unsigned int i)
 {
     unsigned int um = (unsigned int)(column + dice[i]);
 
@@ -174,11 +174,11 @@ Column &Board::getPrison()
     return (turn == Side::BLACK) ? bPrison : wPrison;
 }
 
-void Board::moveOutOfPrison(unsigned int i)
+unsigned int Board::moveOutOfPrison(unsigned int i)
 {
     if (i >= dice.size())
     {
-        return;
+        exit(3);
     }
     int column = (turn == Side::BLACK) ? -1 : 24;
 
@@ -207,6 +207,7 @@ void Board::moveOutOfPrison(unsigned int i)
             dice.erase(dice.begin() + i);
         }
     }
+    return (unsigned int)(dice[i] - 1);
 }
 
 bool Board::checkPrisonMoves()
@@ -231,13 +232,6 @@ bool Board::checkPrisonMoves()
     return false;
 }
 
-//
-//
-//
-//
-//
-//
-//
 bool Board::signColumnsFor(unsigned int column)
 {
     bool success = false;
@@ -273,6 +267,66 @@ bool Board::moveTo(unsigned int originColumn, unsigned int DestinationColumn)
     {
         originColumn = move(originColumn, diceIndex);
         success = true;
+    }
+    reset();
+    return success;
+}
+
+bool Board::signColumnsForPrison()
+{
+    bool success = false;
+    for (std::size_t i = 0; i < dice.size(); i++)
+    {
+        if (turn == Side::BLACK)
+        {
+            if (checkMoveTo(-1, i))
+            {
+                unsigned int um = (unsigned int)(-1 + dice[i]);
+                // for now
+                list[um].sign({i});
+                list[um].setSigned(true);
+                success = true;
+            }
+        }
+        else
+        {
+            if (checkMoveTo(24, i))
+            {
+                unsigned int um = (unsigned int)(24 + dice[i]);
+                // for now
+                list[um].sign({i});
+                list[um].setSigned(true);
+                success = true;
+            }
+        }
+    }
+    return success;
+}
+
+bool Board::moveFromPrisonTo(unsigned int column)
+{
+    if (!validColumnDestination(column))
+    {
+        reset();
+        return false;
+    }
+
+    bool success = false;
+
+    int originColumn = -1;
+    bool first = true;
+    for (auto diceIndex : list[column].diceIndexes)
+    {
+        if (first)
+        {
+            originColumn = moveOutOfPrison(diceIndex);
+            first = false;
+            success = true;
+        }
+        else
+        {
+            originColumn = move(originColumn, diceIndex);
+        }
     }
     reset();
     return success;
