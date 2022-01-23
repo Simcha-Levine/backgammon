@@ -15,7 +15,9 @@ public:
     Graphics(Board *b, int *w, int *h, int *c);
     ~Graphics();
 
-    sf::ConvexShape getColumnShape(float w, float h, float x, int dir, int c);
+    sf::ConvexShape getColumnShape(float w, float h,
+                                   float x, int dir,
+                                   int c, bool isSigned);
 
     sf::CircleShape getPice(float w, float x, float y, int dir, Side s, int chose);
 

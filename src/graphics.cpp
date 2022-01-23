@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 #include <math.h>
+#include <iostream>
 
 Graphics::Graphics()
 {
@@ -25,7 +26,9 @@ Graphics::~Graphics()
 {
 }
 
-sf::ConvexShape Graphics::getColumnShape(float w, float h, float x, int dir, int c)
+sf::ConvexShape Graphics::getColumnShape(float w, float h,
+                                         float x, int dir,
+                                         int c, bool isSigned)
 {
     sf::ConvexShape convex(3);
     x += 5.f;
@@ -48,12 +51,13 @@ sf::ConvexShape Graphics::getColumnShape(float w, float h, float x, int dir, int
     convex.setFillColor(co);
 
     convex.setOutlineThickness(5.f);
-    co = sf::Color::White;
+    co = (isSigned) ? sf::Color::Yellow : sf::Color::White;
     convex.setOutlineColor(co);
     return convex;
 }
 
-sf::CircleShape Graphics::getPice(float w, float x, float y, int dir, Side s, int chose)
+sf::CircleShape Graphics::getPice(float w, float x, float y,
+                                  int dir, Side s, int chose)
 {
     sf::CircleShape ci(w * 0.5f - 5.f);
     if (dir == 0)
@@ -79,11 +83,14 @@ void Graphics::drawColumns(sf::RenderWindow &win, float columnW, float columnH)
 {
     for (int i = 0; i < 12; i++)
     {
-        win.draw(getColumnShape(columnW, columnH, i * columnW, 0, i));
+        bool t = board->list[i].isSigned();
+        win.draw(getColumnShape(columnW, columnH, i * columnW, 0, i, t));
     }
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 13; i++)
     {
-        win.draw(getColumnShape(columnW, columnH, i * columnW, 1, i + 1));
+        bool t = board->list[i + 11].isSigned();
+        float x = *width - i * columnW;
+        win.draw(getColumnShape(columnW, columnH, x, 1, i + 1, t));
     }
 }
 
@@ -114,7 +121,6 @@ void Graphics::drawPicces(sf::RenderWindow &win, float columnW)
 }
 
 void Graphics::draw(sf::RenderWindow &win)
-
 {
     win.clear(sf::Color::Black);
 

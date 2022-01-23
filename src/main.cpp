@@ -53,43 +53,42 @@ int getUsedDiceIndex(int col, int chosen)
 
 void chose(sf::RenderWindow &win)
 {
+    turns();
+
     sf::Vector2i p = sf::Mouse::getPosition(win);
     int col = getColumn(p);
-    int diceUsedIndex = -1;
 
     if (chosen == -1 && board.getPrison().getCount() == 0)
     {
         if (board.validColumn(col))
         {
             chosen = col;
+            board.signColumnsFor(chosen);
         }
     }
     else if (board.getPrison().getCount() > 0)
     {
-        if (board.validColumnDestination(col))
-        {
-            diceUsedIndex = getUsedDiceIndex(col, chosen);
+        // if (board.validColumnDestination(col))
+        // {
+        //     diceUsedIndex = getUsedDiceIndex(col, chosen);
 
-            int t = (board.turn == Side::BLACK) ? -1 : 24;
+        //     int t = (board.turn == Side::BLACK) ? -1 : 24;
 
-            if (diceUsedIndex != -1 && board.checkMoveTo(t, diceUsedIndex))
-            {
-                board.moveOutOfPrison(diceUsedIndex);
-                turns();
-            }
-            chosen = -1;
-        }
+        //     if (diceUsedIndex != -1 && board.checkMoveTo(t, diceUsedIndex))
+        //     {
+        //         board.moveOutOfPrison(diceUsedIndex);
+        //         turns();
+        //     }
+        //     chosen = -1;
+        // }
     }
     else
     {
         if (board.validColumnDestination(col))
         {
-            diceUsedIndex = getUsedDiceIndex(col, chosen);
 
-            if (diceUsedIndex != -1 &&
-                board.checkMoveTo(chosen, diceUsedIndex))
+            if (board.moveTo(chosen, col))
             {
-                board.move(chosen, diceUsedIndex);
                 turns();
             }
             chosen = -1;
@@ -120,94 +119,5 @@ int main()
         }
 
         graphics.draw(window);
-    }
-}
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-// debuging tools
-void printVec(std::vector<int> &vec)
-{
-    std::cout << "[ ";
-
-    for (int i : vec)
-    {
-        std::cout << i << " , ";
-    }
-    std::cout << "]\n";
-}
-void test()
-{
-    for (int y = 0; y < 6; y++)
-    {
-        drawTerminal(board);
-        std::cout << ((board.turn == Side::BLACK) ? "black\n" : "white\n");
-        std::cout << board.dice[0] << " , " << board.dice[1] << '\n';
-        if (board.checkIfCanMove())
-        {
-            std::cout << "enter a column : \n";
-            int column;
-            std::cin >> column;
-            if (board.validColumn(column))
-            {
-                if (board.checkMovesFor(column))
-                {
-                    std::cout << "enter dice\n";
-                    unsigned int i;
-                    std::cin >> i;
-                    if (board.checkMoveTo(column, i))
-                    {
-                        board.move(column, i);
-                    }
-                    else
-                    {
-                        std::cout << "can't\n";
-                    }
-                }
-            }
-            else
-            {
-                std::cout << "not yours\n";
-            }
-        }
-        else
-        {
-            board.parsTurn();
-            board.generateDice();
-        }
-    }
-}
-void drawTerminal(Board &board)
-{
-
-    for (int i = 7; i >= 0; i--)
-    {
-        std::cout << '|';
-
-        for (Column c : board.list)
-        {
-            char d = (c.getSide() == Side::BLACK) ? 'X' : 'O';
-            if (i < c.getCount())
-            {
-                std::cout << d << '|';
-            }
-            else
-            {
-                std::cout << " |";
-            }
-        }
-        std::cout << '\n';
     }
 }

@@ -1,5 +1,7 @@
 #include "../include/board.hpp"
 #include <iostream>
+#include <stdlib.h>
+#include <time.h>
 
 Board::Board(Side start)
 {
@@ -15,6 +17,8 @@ Board::Board(Side start)
     list[18] = Column(5, Side::BLACK);
     list[23] = Column(2, Side::WHITE);
 
+    srand(time(0));
+
     generateDice();
 }
 
@@ -25,8 +29,8 @@ Board::~Board()
 void Board::generateDice()
 {
     dice.clear();
-    int die1 = 3;
-    int die2 = 4;
+    int die1 = std::rand() % (6) + 1;
+    int die2 = std::rand() % (6) + 1;
 
     int m = ((turn == Side::WHITE) ? -1 : 1);
 
@@ -44,11 +48,12 @@ void Board::generateDice()
     }
 }
 
-bool Board::checkMoveTo(int column, unsigned int i)
+bool Board::checkMoveTo(unsigned int column, unsigned int i)
 {
-    if (column + dice[i] >= 0 && column + dice[i] < 24)
+    unsigned int um = (unsigned int)(column + dice[i]);
+
+    if (um < 24)
     {
-        unsigned int um = (unsigned int)(column + dice[i]);
         if (!list[um].checkForLand(turn) && !list[um].checkForEat(turn))
         {
             return false;
@@ -61,13 +66,13 @@ bool Board::checkMoveTo(int column, unsigned int i)
     return true;
 }
 
-void Board::move(int column, unsigned int i)
+unsigned int Board::move(unsigned int column, unsigned int i)
 {
     if (i >= dice.size())
     {
-        return;
+        exit(3);
     }
-    if (column >= 0 && column < 24 && column + dice[i] >= 0 && column + dice[i] < 24)
+    if (column < 24 && column + dice[i] < 24)
     {
         Column &org = list[(unsigned int)column];
         Column &des = list[(unsigned int)(column + dice[i])];
@@ -92,11 +97,12 @@ void Board::move(int column, unsigned int i)
             dice.erase(dice.begin() + i);
         }
     }
+    return (unsigned int)(column + dice[i]);
 }
 
-bool Board::checkMovesFor(int column)
+bool Board::checkMovesFor(unsigned int column)
 {
-    if (column < 0 || column > 23)
+    if (!validColumn(column))
     {
         return false;
     }
@@ -104,6 +110,7 @@ bool Board::checkMovesFor(int column)
     {
         if (checkMoveTo(column, i))
         {
+
             return true;
         }
     }
@@ -147,17 +154,17 @@ void Board::parsTurn()
     turn = (turn == Side::BLACK) ? Side::WHITE : Side::BLACK;
 }
 
-bool Board::validColumnDestination(int column)
+bool Board::validColumnDestination(unsigned int column)
 {
-    return column >= 0 && column < 24 &&
+    return column < 24 &&
            (list[(unsigned int)column].getSide() == turn ||
             list[(unsigned int)column].getSide() == Side::NUTHING ||
             list[(unsigned int)column].getCount() <= 1);
 }
 
-bool Board::validColumn(int column)
+bool Board::validColumn(unsigned int column)
 {
-    return column >= 0 && column < 24 &&
+    return column < 24 &&
            (list[(unsigned int)column].getSide() == turn ||
             list[(unsigned int)column].getSide() == Side::NUTHING);
 }
@@ -222,4 +229,60 @@ bool Board::checkPrisonMoves()
         }
     }
     return false;
+}
+
+//
+//
+//
+//
+//
+//
+//
+bool Board::signColumnsFor(unsigned int column)
+{
+    bool success = false;
+    if (!validColumn(column))
+    {
+        return false;
+    }
+    for (std::size_t i = 0; i < dice.size(); i++)
+    {
+        if (checkMoveTo(column, i))
+        {
+            unsigned int um = (unsigned int)(column + dice[i]);
+            // for now
+            list[um].sign({i});
+            list[um].setSigned(true);
+            success = true;
+        }
+    }
+    return success;
+}
+
+bool Board::moveTo(unsigned int originColumn, unsigned int DestinationColumn)
+{
+    if (!validColumnDestination(DestinationColumn) || !validColumn(originColumn))
+    {
+        reset();
+        return false;
+    }
+
+    bool success = false;
+
+    for (auto diceIndex : list[DestinationColumn].diceIndexes)
+    {
+        originColumn = move(originColumn, diceIndex);
+        success = true;
+    }
+    reset();
+    return success;
+}
+
+void Board::reset()
+{
+    for (std::size_t i = 0; i < list.size(); i++)
+    {
+        list[i].sign({});
+        list[i].setSigned(false);
+    }
 }

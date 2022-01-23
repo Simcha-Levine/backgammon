@@ -5,9 +5,12 @@
 class Board
 {
 private:
-    // remember
     Column black_end{6, Side::BLACK};
     Column white_end{6, Side::WHITE};
+
+    bool checkMovesFor(unsigned int column);
+    bool checkMoveTo(unsigned int column, unsigned int diceIndex);
+    unsigned int move(unsigned int column, unsigned int diceIndex);
 
 public:
     std::array<Column, 24> list{};
@@ -22,20 +25,20 @@ public:
 
     void generateDice();
 
-    bool checkMoveTo(int column, unsigned int diceIndex);
-    // bool checkMoves(std::vector<int> diceIndcis);
+    bool checkIfCanMove();
+
+    bool signColumnsFor(unsigned int column);
+    bool moveTo(unsigned int originColumn, unsigned int column);
+    void reset();
+
     bool checkPrisonMoves();
 
-    void move(int column, unsigned int diceIndex);
     void moveOutOfPrison(unsigned int diceIndex);
-
-    bool checkMovesFor(int column);
-    bool checkIfCanMove();
 
     void parsTurn();
 
-    bool validColumnDestination(int column);
-    bool validColumn(int column);
+    bool validColumnDestination(unsigned int column);
+    bool validColumn(unsigned int column);
 
     Column &getPrison();
 };

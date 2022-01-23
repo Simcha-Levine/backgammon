@@ -1,0 +1,13 @@
+check if can move at all
+
+press a column
+
+updates all columns that can be reached
+
+press another column
+
+check if is a signed column and move
+
+reset all columns
+
+//check if there are eny moves for column
