@@ -74,14 +74,13 @@ void chose(sf::RenderWindow &win)
     else if (board.getPrison().getCount() > 0)
     {
         board.moveFromPrisonTo(col);
-        turns();
     }
     else
     {
         board.moveTo(chosen, col);
-        turns();
         chosen = -1;
     }
+    turns();
 }
 
 int main()
