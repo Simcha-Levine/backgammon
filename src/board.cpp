@@ -2,6 +2,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
+#include <algorithm>
 
 Board::Board(Side start)
 {
@@ -31,6 +32,8 @@ void Board::generateDice()
     dice.clear();
     int die1 = std::rand() % (6) + 1;
     int die2 = std::rand() % (6) + 1;
+    // int die1 = 2;
+    // int die2 = 2;
 
     int m = ((turn == Side::WHITE) ? -1 : 1);
 
@@ -88,13 +91,11 @@ unsigned int Board::move(unsigned int column, unsigned int i)
             {
                 bPrison.add(Side::BLACK);
             }
-            dice.erase(dice.begin() + i);
         }
         else if (des.checkForLand(turn))
         {
             des.add(turn);
             org.remove();
-            dice.erase(dice.begin() + i);
         }
     }
     return (unsigned int)(column + dice[i]);
@@ -164,9 +165,9 @@ bool Board::validColumnDestination(unsigned int column)
 
 bool Board::validColumn(unsigned int column)
 {
+    // std::cout << column << "e" << '\n';
     return column < 24 &&
-           (list[(unsigned int)column].getSide() == turn ||
-            list[(unsigned int)column].getSide() == Side::NUTHING);
+           (list[(unsigned int)column].getSide() == turn);
 }
 
 Column &Board::getPrison()
@@ -232,6 +233,74 @@ bool Board::checkPrisonMoves()
     return false;
 }
 
+bool Board::firstSign(int column)
+{
+    bool success = false;
+    for (std::size_t i = 0; i < dice.size(); i++)
+    {
+        if (checkMoveTo(column, i))
+        {
+            unsigned int um = (unsigned int)(column + dice[i]);
+            list[um].sign({static_cast<int>(i)});
+            list[um].setSigned(true);
+            success = true;
+        }
+    }
+    return success;
+}
+
+void Board::secondSign(int column)
+{
+    if (column + dice[0] < 0 || column + dice[1] < 0)
+    {
+        return;
+    }
+    unsigned int um1 = (unsigned int)(column + dice[0]);
+    unsigned int um2 = (unsigned int)(column + dice[1]);
+    std::cout << um2 << " \n";
+    if (list[um1].isSigned())
+    {
+        if (checkMoveTo(um1, 1))
+        {
+            unsigned int un = (unsigned int)(um1 + dice[1]);
+            list[un].sign({0, 1});
+            list[un].setSigned(true);
+        }
+    }
+    else if (list[um2].isSigned())
+    {
+        if (checkMoveTo(um2, 0))
+        {
+            unsigned int un = (unsigned int)(um2 + dice[0]);
+            list[un].sign({1, 0});
+            list[un].setSigned(true);
+        }
+    }
+}
+
+bool Board::signForDouble(int column)
+{
+    bool success = false;
+    std::vector<int> indexes;
+    int um = column;
+    for (std::size_t i = 0; i < dice.size(); i++)
+    {
+        if (checkMoveTo(um, static_cast<unsigned int>(i)))
+        {
+            indexes.push_back(static_cast<unsigned int>(i));
+            um = (unsigned int)(um + dice[i]);
+            list[um].sign(indexes);
+            list[um].setSigned(true);
+            success = true;
+        }
+        else
+        {
+            break;
+        }
+    }
+    return success;
+}
+
 bool Board::signColumnsFor(unsigned int column)
 {
     bool success = false;
@@ -239,17 +308,27 @@ bool Board::signColumnsFor(unsigned int column)
     {
         return false;
     }
-    for (std::size_t i = 0; i < dice.size(); i++)
+
+    if (dice.size() >= 2)
     {
-        if (checkMoveTo(column, i))
+        if (dice[0] == dice[1])
         {
-            unsigned int um = (unsigned int)(column + dice[i]);
-            // for now
-            list[um].sign({i});
-            list[um].setSigned(true);
-            success = true;
+            success = signForDouble((int)column);
+        }
+        else
+        {
+            if (firstSign(column))
+            {
+                secondSign(column);
+                success = true;
+            }
         }
     }
+    else
+    {
+        success = firstSign(column);
+    }
+
     return success;
 }
 
@@ -268,6 +347,14 @@ bool Board::moveTo(unsigned int originColumn, unsigned int DestinationColumn)
         originColumn = move(originColumn, diceIndex);
         success = true;
     }
+
+    std::vector<int> v = list[DestinationColumn].diceIndexes;
+    std::sort(v.begin(), v.end(), std::greater<int>());
+    for (auto diceIndex : v)
+    {
+        dice.erase(dice.begin() + diceIndex);
+    }
+
     reset();
     return success;
 }
@@ -283,7 +370,7 @@ bool Board::signColumnsForPrison()
             {
                 unsigned int um = (unsigned int)(-1 + dice[i]);
                 // for now
-                list[um].sign({i});
+                list[um].sign({static_cast<int>(i)});
                 list[um].setSigned(true);
                 success = true;
             }
@@ -294,7 +381,7 @@ bool Board::signColumnsForPrison()
             {
                 unsigned int um = (unsigned int)(24 + dice[i]);
                 // for now
-                list[um].sign({i});
+                list[um].sign({static_cast<int>(i)});
                 list[um].setSigned(true);
                 success = true;
             }

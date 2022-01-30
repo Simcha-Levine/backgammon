@@ -140,9 +140,9 @@ void Graphics::drawTurn(sf::RenderWindow &win)
 {
     sf::Text text;
     text.setFont(font);
-    text.setCharacterSize(24);
+    text.setCharacterSize(26);
     text.setFillColor(sf::Color::White);
-    text.setPosition(*width / 2 - 300, *hight / 2);
+    text.setPosition(20, *hight / 2);
 
     std::ostringstream str;
 

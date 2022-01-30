@@ -30,6 +30,10 @@ public:
 
     bool checkIfCanMove();
 
+    bool firstSign(int column);
+    void secondSign(int column);
+    bool signForDouble(int column);
+
     bool signColumnsFor(unsigned int column);
     bool moveTo(unsigned int originColumn, unsigned int column);
 

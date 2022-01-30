@@ -73,7 +73,7 @@ bool Column::eat(Side s)
     return false;
 }
 
-void Column::sign(std::vector<std::size_t> indexes)
+void Column::sign(std::vector<int> indexes)
 {
     diceIndexes = indexes;
 }
