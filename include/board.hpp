@@ -10,7 +10,7 @@ private:
 
     bool checkMovesFor(unsigned int column);
     bool checkMoveTo(int column, unsigned int diceIndex);
-    unsigned int move(unsigned int column, unsigned int diceIndex);
+    unsigned int move(int column, unsigned int diceIndex);
 
     bool checkPrisonMoves();
     unsigned int moveOutOfPrison(unsigned int diceIndex);
@@ -34,7 +34,7 @@ public:
     void secondSign(int column);
     bool signForDouble(int column);
 
-    bool signColumnsFor(unsigned int column);
+    bool signColumnsFor(int column);
     bool moveTo(unsigned int originColumn, unsigned int column);
 
     bool signColumnsForPrison();

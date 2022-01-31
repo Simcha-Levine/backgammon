@@ -7,7 +7,7 @@
 Board::Board(Side start)
 {
 
-    turn = start;
+    turn = Side::WHITE;
     // seting the pieces in there place
     list[0] = Column(2, Side::BLACK);
     list[5] = Column(5, Side::WHITE);
@@ -17,6 +17,11 @@ Board::Board(Side start)
     list[16] = Column(3, Side::BLACK);
     list[18] = Column(5, Side::BLACK);
     list[23] = Column(2, Side::WHITE);
+
+    list[22] = Column(1, Side::BLACK);
+    list[21] = Column(1, Side::BLACK);
+    list[20] = Column(1, Side::BLACK);
+    list[19] = Column(1, Side::BLACK);
 
     srand(time(0));
 
@@ -32,8 +37,6 @@ void Board::generateDice()
     dice.clear();
     int die1 = std::rand() % (6) + 1;
     int die2 = std::rand() % (6) + 1;
-    // int die1 = 2;
-    // int die2 = 2;
 
     int m = ((turn == Side::WHITE) ? -1 : 1);
 
@@ -69,10 +72,11 @@ bool Board::checkMoveTo(int column, unsigned int i)
     return true;
 }
 
-unsigned int Board::move(unsigned int column, unsigned int i)
+unsigned int Board::move(int column, unsigned int i)
 {
     if (i >= dice.size())
     {
+        std::cout << i << " is bigger than dice size" << std::endl;
         exit(3);
     }
     if (column < 24 && column + dice[i] < 24)
@@ -165,7 +169,6 @@ bool Board::validColumnDestination(unsigned int column)
 
 bool Board::validColumn(unsigned int column)
 {
-    // std::cout << column << "e" << '\n';
     return column < 24 &&
            (list[(unsigned int)column].getSide() == turn);
 }
@@ -179,6 +182,7 @@ unsigned int Board::moveOutOfPrison(unsigned int i)
 {
     if (i >= dice.size())
     {
+        std::cout << i << " is bigger than dice size\n";
         exit(3);
     }
     int column = (turn == Side::BLACK) ? -1 : 24;
@@ -199,13 +203,11 @@ unsigned int Board::moveOutOfPrison(unsigned int i)
             {
                 bPrison.add(Side::BLACK);
             }
-            dice.erase(dice.begin() + i);
         }
         else if (des.checkForLand(turn))
         {
             des.add(turn);
             org.remove();
-            dice.erase(dice.begin() + i);
         }
     }
     return (unsigned int)(dice[i] - 1);
@@ -257,7 +259,6 @@ void Board::secondSign(int column)
     }
     unsigned int um1 = (unsigned int)(column + dice[0]);
     unsigned int um2 = (unsigned int)(column + dice[1]);
-    std::cout << um2 << " \n";
     if (list[um1].isSigned())
     {
         if (checkMoveTo(um1, 1))
@@ -301,19 +302,15 @@ bool Board::signForDouble(int column)
     return success;
 }
 
-bool Board::signColumnsFor(unsigned int column)
+bool Board::signColumnsFor(int column)
 {
     bool success = false;
-    if (!validColumn(column))
-    {
-        return false;
-    }
 
     if (dice.size() >= 2)
     {
         if (dice[0] == dice[1])
         {
-            success = signForDouble((int)column);
+            success = signForDouble(column);
         }
         else
         {
@@ -366,25 +363,11 @@ bool Board::signColumnsForPrison()
     {
         if (turn == Side::BLACK)
         {
-            if (checkMoveTo(-1, i))
-            {
-                unsigned int um = (unsigned int)(-1 + dice[i]);
-                // for now
-                list[um].sign({static_cast<int>(i)});
-                list[um].setSigned(true);
-                success = true;
-            }
+            success = signColumnsFor(-1);
         }
         else
         {
-            if (checkMoveTo(24, i))
-            {
-                unsigned int um = (unsigned int)(24 + dice[i]);
-                // for now
-                list[um].sign({static_cast<int>(i)});
-                list[um].setSigned(true);
-                success = true;
-            }
+            success = signColumnsFor(24);
         }
     }
     return success;
@@ -402,18 +385,33 @@ bool Board::moveFromPrisonTo(unsigned int column)
 
     int originColumn = -1;
     bool first = true;
+
     for (auto diceIndex : list[column].diceIndexes)
     {
+        std::cout << "first B\n";
+
         if (first)
         {
+            // std::cout << "first A\n";
             originColumn = moveOutOfPrison(diceIndex);
+            // std::cout << "first B\n";
             first = false;
             success = true;
         }
         else
         {
+            // std::cout << "second A\n";
             originColumn = move(originColumn, diceIndex);
+            // std::cout << "second B\n";
         }
+    }
+    std::cout << "B\n";
+
+    std::vector<int> v = list[column].diceIndexes;
+    std::sort(v.begin(), v.end(), std::greater<int>());
+    for (auto diceIndex : v)
+    {
+        dice.erase(dice.begin() + diceIndex);
     }
     reset();
     return success;
