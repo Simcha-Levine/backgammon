@@ -7,7 +7,7 @@
 Board::Board(Side start)
 {
 
-    turn = Side::WHITE;
+    turn = start;
     // seting the pieces in there place
     list[0] = Column(2, Side::BLACK);
     list[5] = Column(5, Side::WHITE);
@@ -388,25 +388,17 @@ bool Board::moveFromPrisonTo(unsigned int column)
 
     for (auto diceIndex : list[column].diceIndexes)
     {
-        std::cout << "first B\n";
-
         if (first)
         {
-            // std::cout << "first A\n";
             originColumn = moveOutOfPrison(diceIndex);
-            // std::cout << "first B\n";
             first = false;
             success = true;
         }
         else
         {
-            // std::cout << "second A\n";
             originColumn = move(originColumn, diceIndex);
-            // std::cout << "second B\n";
         }
     }
-    std::cout << "B\n";
-
     std::vector<int> v = list[column].diceIndexes;
     std::sort(v.begin(), v.end(), std::greater<int>());
     for (auto diceIndex : v)
