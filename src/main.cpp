@@ -26,6 +26,8 @@ void turns()
     {
         board.signColumnsForPrison();
     }
+
+    board.checkIfEnd();
 }
 
 int getColumn(sf::Vector2i p)

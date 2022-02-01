@@ -18,10 +18,15 @@ Board::Board(Side start)
     list[18] = Column(5, Side::BLACK);
     list[23] = Column(2, Side::WHITE);
 
-    list[22] = Column(1, Side::BLACK);
-    list[21] = Column(1, Side::BLACK);
-    list[20] = Column(1, Side::BLACK);
-    list[19] = Column(1, Side::BLACK);
+    list[1] = Column(1, Side::WHITE);
+    list[2] = Column(1, Side::WHITE);
+    list[3] = Column(1, Side::WHITE);
+    list[4] = Column(1, Side::WHITE);
+
+    // list[19] = Column(1, Side::BLACK);
+    // list[20] = Column(1, Side::BLACK);
+    // list[21] = Column(1, Side::BLACK);
+    // list[22] = Column(1, Side::BLACK);
 
     srand(time(0));
 
@@ -52,6 +57,8 @@ void Board::generateDice()
         dice.push_back(die1 * m);
         dice.push_back(die2 * m);
     }
+
+    std::cout << "dice : " << die1 << " , " << die2 << '\n';
 }
 
 bool Board::checkMoveTo(int column, unsigned int i)
@@ -79,7 +86,7 @@ unsigned int Board::move(int column, unsigned int i)
         std::cout << i << " is bigger than dice size" << std::endl;
         exit(3);
     }
-    if (column < 24 && column + dice[i] < 24)
+    if (column + dice[i] < 24 && column + dice[i] > -1)
     {
         Column &org = list[(unsigned int)column];
         Column &des = list[(unsigned int)(column + dice[i])];
@@ -161,10 +168,12 @@ void Board::parsTurn()
 
 bool Board::validColumnDestination(unsigned int column)
 {
-    return column < 24 &&
-           (list[(unsigned int)column].getSide() == turn ||
-            list[(unsigned int)column].getSide() == Side::NUTHING ||
-            list[(unsigned int)column].getCount() <= 1);
+    bool a = column < 24;
+    bool b = list[column].getSide() == turn;
+    bool c = list[column].getSide() == Side::NUTHING;
+    bool d = list[column].getCount() <= 1;
+
+    return a && (b || c || d);
 }
 
 bool Board::validColumn(unsigned int column)
@@ -210,9 +219,10 @@ unsigned int Board::moveOutOfPrison(unsigned int i)
             org.remove();
         }
     }
-    return (unsigned int)(dice[i] - 1);
-}
 
+    int result = (turn == Side::BLACK) ? dice[i] - 1 : dice[i] + 24;
+    return (unsigned int)(result);
+}
 bool Board::checkPrisonMoves()
 {
     for (std::size_t i = 0; i < dice.size(); i++)
@@ -339,19 +349,17 @@ bool Board::moveTo(unsigned int originColumn, unsigned int DestinationColumn)
 
     bool success = false;
 
+    std::cout << "chosen : ";
+
     for (auto diceIndex : list[DestinationColumn].diceIndexes)
     {
         originColumn = move(originColumn, diceIndex);
         success = true;
+        std::cout << dice[diceIndex] << ", ";
     }
+    std::cout << std::endl;
 
-    std::vector<int> v = list[DestinationColumn].diceIndexes;
-    std::sort(v.begin(), v.end(), std::greater<int>());
-    for (auto diceIndex : v)
-    {
-        dice.erase(dice.begin() + diceIndex);
-    }
-
+    eraseDice(list[DestinationColumn].diceIndexes);
     reset();
     return success;
 }
@@ -381,11 +389,12 @@ bool Board::moveFromPrisonTo(unsigned int column)
         return false;
     }
 
+    std::cout << "chosen : ";
+
     bool success = false;
 
     int originColumn = -1;
     bool first = true;
-
     for (auto diceIndex : list[column].diceIndexes)
     {
         if (first)
@@ -393,20 +402,29 @@ bool Board::moveFromPrisonTo(unsigned int column)
             originColumn = moveOutOfPrison(diceIndex);
             first = false;
             success = true;
+            std::cout << dice[diceIndex] << ", ";
         }
         else
         {
             originColumn = move(originColumn, diceIndex);
+            std::cout << dice[diceIndex] << ", ";
         }
     }
-    std::vector<int> v = list[column].diceIndexes;
-    std::sort(v.begin(), v.end(), std::greater<int>());
-    for (auto diceIndex : v)
+    std::cout << std::endl;
+
+    eraseDice(list[column].diceIndexes);
+
+    reset();
+    return success;
+}
+
+void Board::eraseDice(std::vector<int> vec)
+{
+    std::sort(vec.begin(), vec.end(), std::greater<int>());
+    for (auto diceIndex : vec)
     {
         dice.erase(dice.begin() + diceIndex);
     }
-    reset();
-    return success;
 }
 
 void Board::reset()
@@ -415,5 +433,48 @@ void Board::reset()
     {
         list[i].sign({});
         list[i].setSigned(false);
+    }
+}
+
+void Board::checkIfEnd()
+{
+    int count = 0;
+    if (turn == Side::BLACK)
+    {
+        if (is_black_end)
+        {
+            return;
+        }
+        for (int i = 18; i < 24; i++)
+        {
+            if (list[i].getSide() == turn)
+            {
+                count += list[i].getCount();
+            }
+        }
+        if (count == 15)
+        {
+            is_black_end = true;
+            std::cout << "ddddd\n";
+        }
+    }
+    else
+    {
+        if (is_white_end)
+        {
+            return;
+        }
+        for (int i = 0; i < 6; i++)
+        {
+            if (list[i].getSide() == turn)
+            {
+                count += list[i].getCount();
+            }
+        }
+        if (count == 15)
+        {
+            is_white_end = true;
+            std::cout << "ddddd\n";
+        }
     }
 }
