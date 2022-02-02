@@ -61,9 +61,15 @@ int getUsedDiceIndex(int col, int chosen)
 void chose(sf::RenderWindow &win)
 {
     turns();
-
     sf::Vector2i p = sf::Mouse::getPosition(win);
     int col = getColumn(p);
+    if (col == -1)
+    {
+        chosen = -1;
+        board.reset();
+        return;
+    }
+    std::cout << col << "\n";
 
     if (chosen == -1 && board.getPrison().getCount() == 0)
     {

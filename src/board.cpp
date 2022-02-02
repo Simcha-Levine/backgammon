@@ -18,16 +18,6 @@ Board::Board(Side start)
     list[18] = Column(5, Side::BLACK);
     list[23] = Column(2, Side::WHITE);
 
-    list[1] = Column(1, Side::WHITE);
-    list[2] = Column(1, Side::WHITE);
-    list[3] = Column(1, Side::WHITE);
-    list[4] = Column(1, Side::WHITE);
-
-    // list[19] = Column(1, Side::BLACK);
-    // list[20] = Column(1, Side::BLACK);
-    // list[21] = Column(1, Side::BLACK);
-    // list[22] = Column(1, Side::BLACK);
-
     srand(time(0));
 
     generateDice();
