@@ -431,10 +431,6 @@ void Board::checkIfEnd()
     int count = 0;
     if (turn == Side::BLACK)
     {
-        if (is_black_end)
-        {
-            return;
-        }
         for (int i = 18; i < 24; i++)
         {
             if (list[i].getSide() == turn)
@@ -442,6 +438,7 @@ void Board::checkIfEnd()
                 count += list[i].getCount();
             }
         }
+        count += black_end.getCount();
         if (count == 15)
         {
             is_black_end = true;
@@ -450,10 +447,6 @@ void Board::checkIfEnd()
     }
     else
     {
-        if (is_white_end)
-        {
-            return;
-        }
         for (int i = 0; i < 6; i++)
         {
             if (list[i].getSide() == turn)
@@ -461,6 +454,7 @@ void Board::checkIfEnd()
                 count += list[i].getCount();
             }
         }
+        count += white_end.getCount();
         if (count == 15)
         {
             is_white_end = true;
